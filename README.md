@@ -1,6 +1,6 @@
 # Klassly photos retriever
 
-Your school chooses for (Klass.ly)[Klass.ly] and you want to retrieve all your photos ?
+Your school chooses for [Klass.ly](https://klass.ly)and you want to retrieve all your photos ?
 This script is for you !
 
 1. Configure the config.json with your username/phone & password

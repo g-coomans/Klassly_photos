@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 import os.path
 import os
+import hashlib
 
 # Load configuration file
 with open("config.json", "r") as f:
@@ -50,6 +51,7 @@ cookies = {
 
 i=0
 attempt_datetime=0
+max_datetime = 0
 
 for klassroom in data['klasses']:
     
@@ -58,59 +60,63 @@ for klassroom in data['klasses']:
     POST_data['filter'] = config['KLASSLY']['filter']
     POST_data['id'] = klassroom
 
-    while True:
+    while True :
         response = session.post(config['KLASSLY']['URL_HISTORY'], data=POST_data)
         data = response.json()
 
         # For each post, turn in all attachment to retrieve photos.
         for post_key, post_values in data['posts'].items():
+            max_datetime = max(max_datetime,config['last_timestamp'],post_values['date'])
             for photo in post_values['attachments'].values():
-                
-                # Prepare date_time and photo variable
-                date_time = datetime.fromtimestamp(post_values['date']/1000)
-                photo_name = date_time.strftime("%Y-%m-%d") + " - "+ photo['name'].split(".")[0]
-                photo_copy = ""
-                photo_extension = "."+photo['name'].split(".")[1]
-                photo_url = photo['url'].split("/")[-1]
-                
                
-                if config['DEBUG']['DEBUG_RETRIEVE']:
-                    # Retrieve photo and save it. If needed, attempt 3 times
-                    for attempt_photo in range(config['TRIES_PHOTOS']):
-                        try:
-                            response = session.get(config['KLASSLY']['URL_IMG']  +photo_url, cookies=cookies)
-                            
-                            if (response.status_code == 200 and config['DEBUG']['DEBUG_SAVE']):
-                                while(os.path.exists(config['FOLDER_SAVE']+photo_name+photo_copy+photo_extension)):
-                                    if photo_copy == "":
-                                        i=1
-                                        photo_copy = "("+str(i)+")"
-                                    else:
-                                        i=i+1
-                                        photo_copy = "("+str(i)+")"
-                                with open(config['FOLDER_SAVE']+photo_name+photo_copy+photo_extension, mode="wb") as file:
-                                    file.write(response.content)
-                                print(photo_name+photo_copy+photo_extension + " : OK")
-                                    
+                if int(post_values['date']) > config['last_timestamp'] :
+#                     print('date_time  : {} - last_timestamp {}'.format(post_values['date'], config['last_timestamp']))
+                    # Prepare date_time and photo variable
+                    date_time = datetime.fromtimestamp(post_values['date']/1000)
+                    photo_name = date_time.strftime("%Y-%m-%d") + " - "+ photo['name'].split(".")[0]
+                    photo_copy = ""
+                    photo_extension = "."+photo['name'].split(".")[1]
+                    photo_url = photo['url'].split("/")[-1]
+                    
+                    if config['DEBUG']['DEBUG_RETRIEVE']:
+                        # Retrieve photo and save it. If needed, attempt 3 times
+                        for attempt_photo in range(config['TRIES_PHOTOS']):
+                            try:
+                                response = session.get(config['KLASSLY']['URL_IMG']  +photo_url, cookies=cookies)
+                                
+                                if (response.status_code == 200 and config['DEBUG']['DEBUG_SAVE']):
+                                    while(os.path.exists(config['FOLDER_SAVE']+photo_name+photo_copy+photo_extension)):
+                                        if photo_copy == "":
+                                            i=1
+                                            photo_copy = "("+str(i)+")"
+                                        else:
+                                            i=i+1
+                                            photo_copy = "("+str(i)+")"
+                                    with open(config['FOLDER_SAVE']+photo_name+photo_copy+photo_extension, mode="wb") as file:
+                                        file.write(response.content)
+                                    print(photo_name+photo_copy+photo_extension + " : OK")
+                                        
+                                else:
+                                    print(config['KLASSLY']['URL_IMG'] + photo_url + " : it looks like we have a problem, sir ! ("+response.status_code+")")
+                            except requests.exceptions.ConnectionError:
+                                time.sleep(config['TIME_BETWEEN_TWO_ATTEMPTS'])
                             else:
-                                print(config['KLASSLY']['URL_IMG'] + photo_url + " : it looks like we have a problem, sir ! ("+response.status_code+")")
-                        except requests.exceptions.ConnectionError:
-                            time.sleep(config['TIME_BETWEEN_TWO_ATTEMPTS'])
+                                break
                         else:
-                            break
-                    else:
-                        print(str(i) + " - " + photo_name)
-                    time.sleep(config['TIME_BETWEEN_TWO_PHOTOS'])
-        
+                            print(str(i) + " - " + photo_name)
+                        time.sleep(config['TIME_BETWEEN_TWO_PHOTOS'])
         if post_values['date'] < POST_data['from']:
             POST_data['from'] = post_values['date']
         elif attempt_datetime == config['TRIES_DATETIME']:
             break
         else:
             attempt_datetime = attempt_datetime + 1
+        
 
 # check for duplicated files based on the date and the md5 check
 # If duplicated, remove the last one
+md5_list = []
+
 for file_name in os.listdir(config['FOLDER_SAVE']):
     date = file_name[0:10]
     with open(config['FOLDER_SAVE'] + "/"+ file_name, 'rb') as file_to_check:
@@ -137,4 +143,11 @@ for try_rename in range(config['TRIES_RENAME']):
                 else:
                     i=i+1
                     number = "("+str(i)+")"
-            os.rename(config['FOLDER_SAVE']+file_name,FOLDER_SAVE+file_name_begin+number+extension)
+            os.rename(config['FOLDER_SAVE']+file_name,config['FOLDER_SAVE']+file_name_begin+number+extension)
+
+
+
+config['last_timestamp'] = max_datetime
+#write it back to the file
+with open('config.json', 'w') as f:
+    json.dump(config, f, indent=4)

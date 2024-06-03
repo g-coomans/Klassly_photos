@@ -1,34 +1,32 @@
 {
-    "FOLDER_SAVE" : "Photos/",
-    "phone" : "your_username",
-    "password" : "your_password",
-    "headers" : "Mozilla/5.0 (X11; Linux aarch64; rv:109.0) Gecko/20100101 Firefox/115.0",
-    "TIME_BETWEEN_TWO_ATTEMPTS" : 3,
-    "TIME_BETWEEN_TWO_PHOTOS" : 5,
-    "TRIES_PHOTOS" : 3,
-    "TRIES_DATETIME" : 5,
-    "TRIES_RENAME" : 3,
-
-    
-    "KLASSLY" : {
-        "URL_START" : "https://fr.klass.ly/",
-        "URL_LOGIN" : "https://api2.klassroom.co/auth.basic",
-        "URL_CONNECT" : "https://api2.klassroom.co/app.connect",
-        "URL_IMG" : "https://www.klass.ly/_data/img/",
-        "URL_HISTORY" : "https://api2.klassroom.co/klass.history",
-        "app-id" : "553e7f3c01ae1",
-        "version" : "7.2",
-        "culture" : "en",
-        "apptype" : "klassroom",
-        "gmt_offset" : "-120",
-        "tz" : "Europe/Paris",
-        "dst" : true,
-        "type" : "post",
-        "filter" : "photo"
-        },
-       
-    "DEBUG" : {
-        "DEBUG_SAVE" : true ,
-        "DEBUG_RETRIEVE" : true
-        }
+    "FOLDER_SAVE": "Photos/",
+    "phone": "",
+    "password": "",
+    "headers": "Mozilla/5.0 (X11; Linux aarch64; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "TIME_BETWEEN_TWO_ATTEMPTS": 3,
+    "TIME_BETWEEN_TWO_PHOTOS": 5,
+    "TRIES_PHOTOS": 3,
+    "TRIES_DATETIME": 5,
+    "TRIES_RENAME": 3,
+    "last_timestamp": 0,
+    "KLASSLY": {
+        "URL_START": "https://fr.klass.ly/",
+        "URL_LOGIN": "https://api2.klassroom.co/auth.basic",
+        "URL_CONNECT": "https://api2.klassroom.co/app.connect",
+        "URL_IMG": "https://www.klass.ly/_data/img/",
+        "URL_HISTORY": "https://api2.klassroom.co/klass.history",
+        "app-id": "553e7f3c01ae1",
+        "version": "7.2",
+        "culture": "en",
+        "apptype": "klassroom",
+        "gmt_offset": "-120",
+        "tz": "Europe/Paris",
+        "dst": true,
+        "type": "post",
+        "filter": "photo"
+    },
+    "DEBUG": {
+        "DEBUG_SAVE": true,
+        "DEBUG_RETRIEVE": true
+    }
 }
